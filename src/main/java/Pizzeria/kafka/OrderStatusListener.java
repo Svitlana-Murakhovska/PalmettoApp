@@ -1,26 +1,26 @@
 package Pizzeria.kafka;
 
-import Pizzeria.model.Order;
+import client.model.Notification;
+import client.model.Order;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
+//import javax.management.Notification;
+
 
 @Component
 public class OrderStatusListener {
 
-        private final Map<Long, Order> orderMap;
+    private final KafkaTemplate<Long, Notification> kafkaTemplate;
 
-        public OrderStatusListener(Map<Long, Order> orderMap) {
-            this.orderMap = orderMap;
-        }
+    public OrderStatusListener(KafkaTemplate<Long, Notification> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
     @KafkaListener(topics = "order-topic", groupId = "order-group")
     public void listen(Order updatedOrder) {
-        // Обновление статуса заказа в базе данных
-        Order existingOrder = orderMap.get(updatedOrder.getId());
-        if (existingOrder != null) {
-            existingOrder.setOrderStatus(updatedOrder.getOrderStatus());
-        }
+        Notification message = new Notification(updatedOrder.getId(), "Ready" );
+        kafkaTemplate.send("notification-topic", message);
     }
 }
