@@ -19,7 +19,8 @@ public class OrderStatusListener {
     }
 
     @KafkaListener(topics = "order-topic", groupId = "palmetto-group")
-    public void listen(Order updatedOrder) {
+    public void listen(Order updatedOrder) throws InterruptedException {
+        Thread.sleep(5000);
         Notification message = new Notification(updatedOrder.getId(), "Ready" );
         kafkaTemplate.send("notification-topic", message);
     }
